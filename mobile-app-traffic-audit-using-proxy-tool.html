@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mobile App Traffic Audit Using Proxy Tool</title>
+  <meta name="description" content="Network Security mini project on mobile app traffic auditing using a proxy tool." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=zodiak@400,700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme="light"] {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+      --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem;
+      --color-bg:#f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-surface-offset:#f3f0ec; --color-border:#d4d1ca; --color-divider:#dcd9d5;
+      --color-text:#28251d; --color-text-muted:#6f6c66; --color-primary:#01696f; --color-primary-hover:#0c4e54; --color-primary-highlight:#cedcd8; --color-warning:#964219;
+      --radius-md:0.5rem; --radius-lg:0.75rem; --radius-xl:1rem; --radius-full:9999px; --shadow-sm:0 1px 2px rgba(0,0,0,0.06); --shadow-md:0 10px 25px rgba(0,0,0,0.08);
+      --font-display:'Zodiak', Georgia, serif; --font-body:'General Sans', Arial, sans-serif; --content:1100px;
+    }
+    [data-theme="dark"] {
+      --color-bg:#171614; --color-surface:#1c1b19; --color-surface-2:#201f1d; --color-surface-offset:#22211f; --color-border:#393836; --color-divider:#262523;
+      --color-text:#e5e3dd; --color-text-muted:#afaca5; --color-primary:#4f98a3; --color-primary-hover:#227f8b; --color-primary-highlight:#313b3b; --color-warning:#d99871;
+      --shadow-sm:0 1px 2px rgba(0,0,0,0.25); --shadow-md:0 10px 25px rgba(0,0,0,0.35);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0} html{scroll-behavior:smooth} body{font-family:var(--font-body);font-size:var(--text-base);line-height:1.6;background:var(--color-bg);color:var(--color-text)}
+    a{text-decoration:none;color:inherit} button{font:inherit;cursor:pointer;border:none;background:none} img,svg{display:block;max-width:100%} table{width:100%;border-collapse:collapse}
+    .container{width:min(calc(100% - 2rem), var(--content));margin-inline:auto} .skip-link{position:absolute;left:-9999px}.skip-link:focus{left:1rem;top:1rem;background:var(--color-primary);color:#fff;padding:.75rem 1rem;border-radius:var(--radius-md)}
+    header{position:sticky;top:0;background:color-mix(in srgb, var(--color-bg) 88%, transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--color-divider);z-index:20}
+    .nav{display:flex;justify-content:space-between;align-items:center;gap:var(--space-4);padding:var(--space-4) 0} .brand{display:flex;gap:var(--space-3);align-items:center;font-weight:700}
+    .brand svg{width:36px;height:36px;color:var(--color-primary)} .links{display:flex;gap:var(--space-4);font-size:var(--text-sm);color:var(--color-text-muted);flex-wrap:wrap}
+    .theme-toggle{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--color-border);border-radius:var(--radius-full);background:var(--color-surface)}
+    .hero{padding:var(--space-16) 0 var(--space-12)} .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:var(--space-8);align-items:center}
+    .eyebrow{display:inline-block;padding:.45rem .85rem;border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-primary);font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+    h1,h2,h3{font-family:var(--font-display);line-height:1.1} h1{font-size:var(--text-2xl);margin:var(--space-4) 0;max-width:12ch} h2{font-size:var(--text-xl);margin-bottom:var(--space-4)} h3{font-size:var(--text-lg);margin-bottom:var(--space-3)}
+    .lead{font-size:var(--text-lg);color:var(--color-text-muted);max-width:62ch} .actions{display:flex;gap:var(--space-3);margin-top:var(--space-6);flex-wrap:wrap}
+    .btn{min-height:44px;padding:.85rem 1.1rem;border-radius:var(--radius-full);font-size:var(--text-sm);font-weight:600;display:inline-flex;align-items:center;justify-content:center}.btn-primary{background:var(--color-primary);color:#fff}.btn-primary:hover{background:var(--color-primary-hover)} .btn-secondary{background:var(--color-surface);border:1px solid var(--color-border)}
+    .panel,.card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm)} .panel{padding:var(--space-6);box-shadow:var(--shadow-md)}
+    section{padding:var(--space-12) 0} .head{display:flex;justify-content:space-between;align-items:end;gap:var(--space-4);margin-bottom:var(--space-6);flex-wrap:wrap}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4)} .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-4)} .card{padding:var(--space-5)}
+    .badge{display:inline-block;margin-bottom:var(--space-3);padding:.35rem .7rem;border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:700;background:var(--color-primary-highlight);color:var(--color-primary)}
+    .warn{background:color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));border-left:4px solid var(--color-warning);padding:var(--space-5);border-radius:var(--radius-lg)}
+    th,td{padding:1rem;border-bottom:1px solid var(--color-divider);text-align:left;font-size:var(--text-sm)} th{background:var(--color-surface-offset)} .table-wrap{overflow:auto;border:1px solid var(--color-border);border-radius:var(--radius-xl)}
+    .steps{display:grid;gap:var(--space-4)} .step{padding:var(--space-5);background:var(--color-surface);border-radius:var(--radius-xl);border:1px solid var(--color-border)}
+    footer{padding:var(--space-10) 0 var(--space-16);color:var(--color-text-muted)}
+    @media (max-width: 900px){.hero-grid,.grid-3,.grid-2{grid-template-columns:1fr 1fr}}
+    @media (max-width: 700px){.hero-grid,.grid-3,.grid-2{grid-template-columns:1fr}.links{display:none}h1{max-width:100%}}
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header>
+    <div class="container nav">
+      <div class="brand">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Mobile audit logo" role="img">
+          <rect x="10" y="8" width="30" height="48" rx="8" stroke="currentColor" stroke-width="4"/>
+          <path d="M22 46H28" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M44 20L54 20M44 32L58 32M44 44L52 44" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <span>Mobile Traffic Audit</span>
+      </div>
+      <nav class="links" aria-label="Main navigation">
+        <a href="#abstract">Abstract</a>
+        <a href="#tools">Tools</a>
+        <a href="#method">Method</a>
+        <a href="#findings">Findings</a>
+        <a href="#viva">Viva</a>
+      </nav>
+      <button class="theme-toggle" data-theme-toggle aria-label="Switch theme">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow">Network Security Mini Project</span>
+          <h1>Mobile App Traffic Audit Using a Proxy Tool</h1>
+          <p class="lead">This project explains how mobile app traffic can be observed and analyzed by routing device requests through an interception proxy. It is designed for academic demonstration, ethical testing, and security learning.</p>
+          <div class="actions">
+            <a class="btn btn-primary" href="#abstract">Open project</a>
+            <a class="btn btn-secondary" href="#viva">View viva questions</a>
+          </div>
+        </div>
+        <aside class="panel">
+          <span class="badge">Project snapshot</span>
+          <div class="grid-2">
+            <div class="card"><h3>Subject</h3><p>Network Security</p></div>
+            <div class="card"><h3>Topic</h3><p>Mobile app traffic audit</p></div>
+            <div class="card"><h3>Technique</h3><p>Proxy-based traffic interception</p></div>
+            <div class="card"><h3>Goal</h3><p>Inspect requests, responses and security posture</p></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="abstract">
+      <div class="container">
+        <div class="head">
+          <div><span class="eyebrow">Project overview</span><h2>Abstract</h2></div>
+          <p>This project studies how a proxy tool can be used to monitor network traffic generated by a mobile application. By redirecting device communication through the proxy, the auditor can examine requests, responses, headers, API endpoints, and selected transport security behaviors.</p>
+        </div>
+        <div class="warn"><strong>Ethical note:</strong> this project is intended only for authorized testing, lab apps, demo apps, or your own applications. Intercepting third-party app traffic without permission is not appropriate.</div>
+      </div>
+    </section>
+
+    <section id="tools">
+      <div class="container">
+        <div class="head">
+          <div><span class="eyebrow">Environment</span><h2>Required tools</h2></div>
+          <p>You can present this project with any standard interception setup using a laptop and a mobile device or emulator.</p>
+        </div>
+        <div class="grid-3">
+          <article class="card"><span class="badge">Tool 01</span><h3>Proxy application</h3><p>Burp Suite, OWASP ZAP, HTTP Toolkit, mitmproxy, or another interception proxy.</p></article>
+          <article class="card"><span class="badge">Tool 02</span><h3>Test device</h3><p>Android phone, iPhone, Android emulator, or test lab device on the same network.</p></article>
+          <article class="card"><span class="badge">Tool 03</span><h3>Network setup</h3><p>Wi-Fi connection, laptop IP address, proxy port, and proxy CA certificate if HTTPS inspection is required.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="method">
+      <div class="container">
+        <div class="head">
+          <div><span class="eyebrow">Procedure</span><h2>Methodology</h2></div>
+          <p>The project can be demonstrated as a practical security audit workflow with clear, explainable phases.</p>
+        </div>
+        <div class="steps">
+          <div class="step"><strong>Step 1:</strong> Install and start the proxy tool on the laptop.</div>
+          <div class="step"><strong>Step 2:</strong> Connect the mobile device to the same Wi-Fi network as the laptop.</div>
+          <div class="step"><strong>Step 3:</strong> Configure the mobile device proxy settings using the laptop IP address and listening port.</div>
+          <div class="step"><strong>Step 4:</strong> Install the proxy CA certificate on the mobile device to inspect encrypted HTTPS traffic in an authorized test setup.</div>
+          <div class="step"><strong>Step 5:</strong> Launch the target app and observe captured requests, responses, domains, methods, headers, and response codes.</div>
+          <div class="step"><strong>Step 6:</strong> Document findings such as insecure API calls, unencrypted data, verbose error responses, or certificate pinning behavior.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="findings">
+      <div class="container">
+        <div class="head">
+          <div><span class="eyebrow">Audit output</span><h2>What can be analyzed</h2></div>
+          <p>The proxy does not just show traffic; it also helps explain the app’s communication design and potential security weaknesses.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Area</th><th>Observation</th><th>Security value</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>HTTP methods</td><td>GET, POST, PUT, DELETE requests used by the app</td><td>Shows how the application communicates with backend APIs</td></tr>
+              <tr><td>Headers</td><td>Authorization tokens, content types, cookies, user agent</td><td>Helps inspect session handling and API behavior</td></tr>
+              <tr><td>Payloads</td><td>Request and response body structure</td><td>Useful for detecting sensitive data exposure</td></tr>
+              <tr><td>Status codes</td><td>200, 401, 403, 404, 500 patterns</td><td>Helps understand authentication and backend validation</td></tr>
+              <tr><td>TLS behavior</td><td>Certificate trust or pinning failure</td><td>Shows whether the app resists interception</td></tr>
+              <tr><td>Endpoints</td><td>API URLs and service domains</td><td>Helps map backend attack surface in an authorized audit</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="limitations">
+      <div class="container">
+        <div class="head">
+          <div><span class="eyebrow">Constraints</span><h2>Limitations</h2></div>
+          <p>Not every mobile app can be intercepted easily, especially when extra transport protections are enabled.</p>
+        </div>
+        <div class="grid-3">
+          <article class="card"><h3>Certificate pinning</h3><p>Some apps reject interception proxies even when the CA certificate is installed.</p></article>
+          <article class="card"><h3>Encrypted payload logic</h3><p>Apps may add application-layer encryption beyond normal HTTPS.</p></article>
+          <article class="card"><h3>Legal scope</h3><p>Testing must remain limited to authorized applications and lab environments.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="viva">
+      <div class="container">
+        <div class="head">
+          <div><span class="eyebrow">Exam support</span><h2>Viva questions and answers</h2></div>
+          <p>These points are useful for viva, seminar, and record submission.</p>
+        </div>
+        <div class="steps">
+          <div class="step"><strong>1. What is a proxy tool?</strong><br>A proxy tool is an intermediate application that receives and forwards network requests between a client and server so that traffic can be inspected or modified during authorized testing.</div>
+          <div class="step"><strong>2. Why is it used in mobile app auditing?</strong><br>It helps the tester observe how the mobile app communicates with backend services and whether data is exposed or weakly protected.</div>
+          <div class="step"><strong>3. Why is a CA certificate needed?</strong><br>It allows the proxy to decrypt HTTPS traffic in a controlled environment by making the device trust the proxy for inspection.</div>
+          <div class="step"><strong>4. What is certificate pinning?</strong><br>Certificate pinning is a defense mechanism where the app trusts only specific certificates or keys, preventing ordinary proxy interception.</div>
+          <div class="step"><strong>5. What can be identified in the audit?</strong><br>Endpoints, methods, headers, session tokens, response behavior, and some transport security weaknesses.</div>
+          <div class="step"><strong>6. What is the main limitation?</strong><br>Some apps use pinning or additional encryption, which blocks normal interception and requires advanced authorized testing methods.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="panel">
+        <strong>Project title:</strong> Mobile App Traffic Audit Using Proxy Tool<br>
+        <strong>Subject:</strong> Network Security<br>
+        <strong>Use case:</strong> College mini project, presentation, GitHub Pages, lab demo.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function(){
+      const root=document.documentElement, btn=document.querySelector('[data-theme-toggle]');
+      let mode=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+      root.setAttribute('data-theme',mode);
+      const render=()=>{btn.setAttribute('aria-label','Switch to '+(mode==='dark'?'light':'dark')+' mode');btn.innerHTML=mode==='dark'?'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>':'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79z"/></svg>'};
+      render(); btn.addEventListener('click',()=>{mode=mode==='dark'?'light':'dark'; root.setAttribute('data-theme',mode); render();});
+    })();
+  </script>
+</body>
+</html>
